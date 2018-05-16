@@ -26,25 +26,27 @@ import org.springframework.util.Assert;
  * @author Dave Syer
  * @author Christian Dupuis
  * @author Andy Wilkinson
+ * @author Vedran Pavic
  * @since 2.0.0
  */
 @Endpoint(id = "health")
 public class HealthEndpoint {
 
-	private final HealthIndicator healthIndicator;
+	private final HealthIndicatorRegistry healthIndicatorRegistry;
 
 	/**
 	 * Create a new {@link HealthEndpoint} instance.
-	 * @param healthIndicator the health indicator
+	 * @param healthIndicatorRegistry the health indicator registry
 	 */
-	public HealthEndpoint(HealthIndicator healthIndicator) {
-		Assert.notNull(healthIndicator, "HealthIndicator must not be null");
-		this.healthIndicator = healthIndicator;
+	public HealthEndpoint(HealthIndicatorRegistry healthIndicatorRegistry) {
+		Assert.notNull(healthIndicatorRegistry,
+				"healthIndicatorRegistry must not be null");
+		this.healthIndicatorRegistry = healthIndicatorRegistry;
 	}
 
 	@ReadOperation
 	public Health health() {
-		return this.healthIndicator.health();
+		return this.healthIndicatorRegistry.health();
 	}
 
 }

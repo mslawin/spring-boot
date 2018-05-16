@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2017 the original author or authors.
+ * Copyright 2012-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,27 +20,27 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
-import org.springframework.boot.actuate.health.CompositeHealthIndicator;
-import org.springframework.boot.actuate.health.CompositeHealthIndicatorFactory;
 import org.springframework.boot.actuate.health.HealthAggregator;
 import org.springframework.boot.actuate.health.HealthIndicator;
+import org.springframework.boot.actuate.health.HealthIndicatorRegistry;
+import org.springframework.boot.actuate.health.HealthIndicatorRegistryFactory;
 import org.springframework.boot.actuate.health.OrderedHealthAggregator;
 import org.springframework.boot.actuate.health.ReactiveHealthIndicator;
 import org.springframework.context.ApplicationContext;
 import org.springframework.util.ClassUtils;
 
 /**
- * Creates a {@link CompositeHealthIndicator} from beans in the
- * {@link ApplicationContext}.
+ * Creates a {@link HealthIndicatorRegistry} from beans in the {@link ApplicationContext}.
  *
  * @author Phillip Webb
+ * @author Stephane Nicoll
  */
-final class HealthIndicatorBeansComposite {
+final class HealthIndicatorRegistryBeans {
 
-	private HealthIndicatorBeansComposite() {
+	private HealthIndicatorRegistryBeans() {
 	}
 
-	public static HealthIndicator get(ApplicationContext applicationContext) {
+	public static HealthIndicatorRegistry get(ApplicationContext applicationContext) {
 		HealthAggregator healthAggregator = getHealthAggregator(applicationContext);
 		Map<String, HealthIndicator> indicators = new LinkedHashMap<>();
 		indicators.putAll(applicationContext.getBeansOfType(HealthIndicator.class));
@@ -48,8 +48,8 @@ final class HealthIndicatorBeansComposite {
 			new ReactiveHealthIndicators().get(applicationContext)
 					.forEach(indicators::putIfAbsent);
 		}
-		CompositeHealthIndicatorFactory factory = new CompositeHealthIndicatorFactory();
-		return factory.createHealthIndicator(healthAggregator, indicators);
+		HealthIndicatorRegistryFactory factory = new HealthIndicatorRegistryFactory();
+		return factory.createHealthIndicatorRegistry(healthAggregator, indicators);
 	}
 
 	private static HealthAggregator getHealthAggregator(

@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2017 the original author or authors.
+ * Copyright 2012-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -41,7 +41,7 @@ public class HealthEndpointTests {
 		healthIndicators.put("upAgain", () -> new Health.Builder().status(Status.UP)
 				.withDetail("second", "2").build());
 		HealthEndpoint endpoint = new HealthEndpoint(
-				createHealthIndicator(healthIndicators));
+				createHealthIndicatorRegistry(healthIndicators));
 		Health health = endpoint.health();
 		assertThat(health.getStatus()).isEqualTo(Status.UP);
 		assertThat(health.getDetails()).containsOnlyKeys("up", "upAgain");
@@ -51,10 +51,12 @@ public class HealthEndpointTests {
 		assertThat(upAgainHealth.getDetails()).containsOnly(entry("second", "2"));
 	}
 
-	private HealthIndicator createHealthIndicator(
+	private HealthIndicatorRegistry createHealthIndicatorRegistry(
 			Map<String, HealthIndicator> healthIndicators) {
-		return new CompositeHealthIndicatorFactory()
-				.createHealthIndicator(new OrderedHealthAggregator(), healthIndicators);
+		HealthIndicatorRegistry registry = new DefaultHealthIndicatorRegistry(
+				new OrderedHealthAggregator());
+		healthIndicators.forEach(registry::register);
+		return registry;
 	}
 
 }
